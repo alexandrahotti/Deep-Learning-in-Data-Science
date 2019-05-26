@@ -1,9 +1,11 @@
 
 function [ngrad_b, ngrad_W]= Assignment1()
 clear;
-addpath Datasets/cifar-10-batches-mat/;
+addpath C:\Users\Alexa\Desktop\KTH\årskurs_4\DeepLearning\Assignments\github\Deep-Learning-in-Data-Science\Datasets\cifar-10-batches-mat;
 
-rng(38);
+rng(400);
+
+% Loading data
 
 [Xtr, Ytr, ytr] = LoadBatch('data_batch_1.mat'); %training data
 [Xva, Yva, yva] = LoadBatch('data_batch_2.mat'); %validation data
@@ -11,62 +13,81 @@ rng(38);
 
 [d, N] = size(Xtr);
 K = max(ytr); 
-
 [b_init, W_init] = initilizeWeightsAndBiases(K, d);
 
+
 %%%%Comparison of numerically and analytically computed mini batch gradients for b and W %%
-h = 1e-6;
-lambda = 0;
-batch_sizes = [1, 40, 100];
-eps=0;
+% h = 1e-6;
+% lambda = 0;
+% batch_sizes = [1, 40, 100];
+% eps=0;
+
 %ComputeAndPlotRelativeError(Xtr, Ytr, batch_sizes, W, b, lambda, eps);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+
 %%% Mini batch gradient descent %%%%
-n_batch = 100;
-GDparameters = GDparams;
-GDparameters.n_batch = 100;
-GDparameters.eta = 0.01;
-GDparameters.n_epochs = 40;
+% GDparameters = GDparams;
+% lambda = 0;
+% GDparameters.n_batch = 100;
+% GDparameters.eta = 0.01; % 0.001
+% GDparameters.n_epochs = 40; % 70
+% 
+% [cost_training, cost_validation, loss_training, loss_validation, Wstar, bstar] = GradientDescent(Xtr, Ytr, Xva, Yva, GDparameters, W_init, b_init, lambda);
+% 
+%%% Plotting the training costs and losses computed after each epoch
+% plotResults(cost_training, cost_validation, GDparameters.n_epochs , 'training cost', 'validation cost', 'Decaying learning rate (d) - Mini batch graddient descent costs', 'epoch', 'cost');
+% plotResults(loss_training, loss_validation, GDparameters.n_epochs , 'training loss', 'validation loss', 'Decaying learning rate (d) - Mini batch graddient descent losses', 'epoch', 'loss');
+%
+% %%% Accuracy of Mini batch gradient descent %%%%
+% acc = ComputeAccuracy(Xte, yte, Wstar, bstar);
+% 
+%%% Plot weights
+% plotWeights(Wstar);
 
-[cost_training, cost_validation, Wstar, bstar] = GradientDescent(Xtr, Ytr, Xva, Yva, GDparameters, W_init, b_init, lambda);
-%plotValidationTrainingCost(cost_training, cost_validation, GDparameters);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%% Accuracy of Mini batch gradient descent %%%%
-acc = ComputeAccuracy(Xte, yte, Wstar, bstar);
-
-%%%% Plot weights %%%%
-plotWeights(Wstar);
 end
 
-function plotValidationTrainingCost(cost_training, cost_validation, GDparams)
-%Plots the 
-n_epochs_range = [1:1:GDparams.n_epochs];
-disp(size(n_epochs_range));
-disp(size(cost_training));
-disp(size(cost_validation));
+function plotResults(training_vals, validation_vals,n_epochs , legend_1, legend_2, title_txt, x_label, y_label)
+figure();
+x_range = 0:1:n_epochs-1;
 
-plot(n_epochs_range, cost_training, n_epochs_range, cost_validation);
-legend('training cost','validation cost');
-title('Cost/loss computed on the training and validation data sets')
-xlabel('epoch')
-ylabel('loss')
+plot(x_range', training_vals, x_range', validation_vals);
+
+legend(legend_1,legend_2);
+title(title_txt)
+xlabel(x_label)
+ylabel(y_label)
+hold on;
+
 end
 
-function [cost_training, cost_validation, W, b] = GradientDescent(Xtr, Ytr, Xva, Yva, GDparams, W, b, lambda)
+
+function [cost_training, cost_validation, loss_training, loss_validation, W, b] = GradientDescent(Xtr, Ytr, Xva, Yva, GDparams, W, b, lambda)
 % This function performs gradient descent on minibatches and run through
 % the the training images the number of times given by: GDparams.n_epochs 
-disp(GDparams.n_epochs);
 
+% Vectors used to store computed costs and losses
 cost_training = zeros(GDparams.n_epochs, 1);
 cost_validation = zeros(GDparams.n_epochs, 1);
 
+loss_training = zeros(GDparams.n_epochs, 1);
+loss_validation = zeros(GDparams.n_epochs, 1);
+
+
+
 for i = 1:GDparams.n_epochs
+
     [W, b] = MiniBatchGD(Xtr, Ytr, GDparams, W, b, lambda, GDparams.n_batch);
-    cost_training(i) = ComputeCost(Xtr, Ytr, W, b, lambda);
-    cost_validation(i) = ComputeCost(Xva, Yva, W, b, lambda);
+    
+    % Compute costs and losses on training and validation data set 
+    [cost_tr, loss_tr] = ComputeCost(Xtr, Ytr, W, b, lambda);
+    cost_training(i) = cost_tr;
+    loss_training(i) = loss_tr;
+    
+    [cost_val, loss_val]  = ComputeCost(Xva, Yva, W, b, lambda);
+    cost_validation(i) = cost_val;
+    loss_validation(i) = loss_val;
 end
 end
 
@@ -123,6 +144,7 @@ ylabel('relavtive error')
 end
 
 function [grad_b, grad_W] = ComputeGradsNumSlow(X, Y, W, b, lambda, h)
+% Computes the numerical gradient
 
 no = size(W, 1);
 d = size(X, 1);
@@ -133,10 +155,10 @@ grad_b = zeros(no, 1);
 for i=1:length(b)
     b_try = b;
     b_try(i) = b_try(i) - h;
-    c1 = ComputeCost(X, Y, W, b_try, lambda);
+    [c1, ~]  = ComputeCost(X, Y, W, b_try, lambda);
     b_try = b;
     b_try(i) = b_try(i) + h;
-    c2 = ComputeCost(X, Y, W, b_try, lambda);
+    [c1, ~]  = ComputeCost(X, Y, W, b_try, lambda);
     grad_b(i) = (c2-c1) / (2*h);
 end
 
@@ -144,11 +166,11 @@ for i=1:numel(W)
     
     W_try = W;
     W_try(i) = W_try(i) - h;
-    c1 = ComputeCost(X, Y, W_try, b, lambda);
+    [c1, ~]  = ComputeCost(X, Y, W_try, b, lambda);
     
     W_try = W;
     W_try(i) = W_try(i) + h;
-    c2 = ComputeCost(X, Y, W_try, b, lambda);
+    [c2, ~] = ComputeCost(X, Y, W_try, b, lambda);
     
     grad_W(i) = (c2-c1) / (2*h);
 end
@@ -156,10 +178,8 @@ end
 end
 
 function[X, Y, y] = LoadBatch(filename)
-%X: dxN
-%Y: is K×N
-%y: is a vector of length N containing the one hot encoding labels for each image. 
-
+% Loads data and normalizes it
+% Also creates one hot encoded labels for the data
 A = load(filename);
 
 X = double(A.data');
@@ -173,7 +193,7 @@ end
 
 
 function[b, W] = initilizeWeightsAndBiases(K, d)
-% b and W are initilized using a normal distribution 
+% Initilization of b and W using a normal distribution 
 
 mu = 0;
 std = 0.01;
@@ -183,7 +203,7 @@ b = std.*randn(K, 1) + mu;
 end
 
 function[Y] = oneHotEncoder(y)
-%creates matrix of one hot encoded data from an array of labels between 
+%creates matrix of one hot encoded data from an array of labels
 
 N = length(y);
 K = max(y) ;
@@ -215,28 +235,39 @@ function P = EvaluateClassifier(X, W, b)
 b_matrix = repmat( b, [1, n] );
 s = W*X + b_matrix;
 
+% Softmax
 exp_row_sum = sum(exp(s));
 P = exp(s)./ repmat(exp_row_sum, K, 1);
 end
 
-function J = ComputeCost(X, Y, W, b, lambda)
+function [J, loss]  = ComputeCost(X, Y, W, b, lambda)
+% Computes the cross entropy cost on a batch of data
+
 %X:  d×n.
 %Y: K×n. The one-hot ground truth labels
 %J: sum of the loss of the network’s predictions
 
 [d, n] = size(X);
 regularization_term = sum( sum(W.^2) )*lambda;
+
 P = EvaluateClassifier(X, W, b); 
+
 l_cross = -log(dot(Y,P));
-J = (sum(l_cross)/n) + regularization_term;
+loss = sum(l_cross)/n;
+
+J = loss + regularization_term;
 end
 
 
 function acc = ComputeAccuracy(X, y, W, b)
+% Computes the accuracy by doing one forward pass and comparing these
+% results to the gorund truth
+
 % X: d×n.
 % y: labels of length n
 % acc: the accuracy.
 
+% forward pass
 P = EvaluateClassifier(X, W, b); % Kxn
 
 [M, I] = max(P,[],1); 
@@ -248,6 +279,9 @@ end
 
 
 function [grad_W, grad_b] = ComputeGradients(X, Y, W, b, lambda)
+% computed the gradients of w and b using the efficient matrix computations
+% described during the lecture
+
 % X: d×n.
 % Y: K×n - the one-hot ground truth labels
 % P: the probability for each label. K×n
@@ -269,9 +303,8 @@ grad_b =  (1/n)*G_batch*vec_ones;
 end
 
 function [Wstar, bstar] = MiniBatchGD(X, Y, GDparams, W, b, lambda, n_batch)
-%Performs gradient descent on batches of data
+%Performs mini batchs gradient descent 
 % X: dxN
-
 [~, N] = size(X);
 
     for j=1:N/n_batch
@@ -294,6 +327,7 @@ function [Wstar, bstar] = MiniBatchGD(X, Y, GDparams, W, b, lambda, n_batch)
 end
 
 function plotWeights( W )
+figure();
 
 for i=1:10
     im = reshape(W(i,:),32,32,3);
@@ -301,8 +335,8 @@ for i=1:10
     s_im{i} = permute(s_im{i}, [2, 1, 3]);
 end
 
-montage(s_im, 'Size', [1,3]);
-
+montage(s_im);
+hold on;
 end
 
 
