@@ -2,7 +2,7 @@ function Assignment3()
 clear;
 addpath C:\Users\Alexa\Desktop\KTH\årskurs_4\DeepLearning\Assignments\github\Deep-Learning-in-Data-Science\Datasets\cifar-10-batches-mat;
 
-rng(123333);
+rng(13);
 
 
 % Loading all availabe training data
@@ -156,21 +156,19 @@ no_dim = 3072;
 % %%%% A 3 layer Neural Network with Batch Normalization %%%%%%%%%%%%%%%%%%%%
 % 
 % 
-m =  [50, 50];
-no_layers = 3;
-%lambda = 0.005;
+m = [60, 50, 40];
+no_layers = 4;
+lambda = 0.005;
 K = 10;
 eps = 0.1;
 h =1e-6;
 d = no_dim;
 
-[W_init, b_init] = initilizeWeightsAndBiases(no_layers, m, K , d);
+%[W_init, b_init] = HEInitilizeWeightsAndBiases(no_layers, m, K , d);
+[W_init, b_init] = initilizeWeightsAndBiases_sensitivity(no_layers, m, K , d);
 [mu, variance] = initilizeMuVarAVG(m, no_layers);
 [betas_init, gammas_init] = initilizeBetasAndGammas(no_layers, m);
-% 
-% 
-% 
-% 
+
 % %%%%%%%% Parametersetting on page 8 in the assignment description %%%%%%
 GDparameters = GDparams;
 GDparameters.n_batch = 100;
@@ -184,11 +182,23 @@ GDparameters.n_epochs = 20;
 alpha = [0, 0.9];
 no_points = 45000;
 
-% [betas_init, gammas_init] = initilizeBetasAndGammas(no_layers, m);
-% 
-% [mu_av, var_av] = initilizeMuVarAVG(m, no_layers);
-% 
-% 
+
+
+[cost_training, cost_validation, loss_training, loss_validation, acc_training, acc_validation, Wstar, bstar, gammasstar, betastar, mu_av, var_av] = GradientDescentCyclicalLearning (Xtr, Ytr, ytr, Xva, Yva, yva, GDparameters, W_init, b_init, lambda, no_layers,betas_init, gammas_init, alpha, mu, variance);
+
+plotResults(cost_training, cost_validation, 100, no_points , GDparameters.n_batch, 'training cost', 'validation cost', 'Costs - 9 layer NN - cyclical learning & BN', 'update step', 'cost');
+plotResults(loss_training, loss_validation, 100, no_points , GDparameters.n_batch, 'training loss', 'validation loss', 'Loss - 9 layer NN - cyclical learning & BN', 'update step', 'loss');
+plotResults(acc_training, acc_validation, 100, no_points , GDparameters.n_batch, 'training accuracy', 'validation accuracy', 'Accuracy - 9 layer NN - cyclical learning & BN', 'update step', 'accuracy');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEST ACCURACY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+acc_test = ComputeAccuracy(Xte, yte, Wstar, bstar, gammasstar, betastar, GDparameters.n_batch , mu_av, var_av);
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
 % % %%%% Coarse Grid Search %%%%%%%%%
 % % l_min = -4;
 % % l_max = -1;
@@ -203,23 +213,16 @@ no_points = 45000;
 % % GridSearch(Xte, yte, Xtr, Ytr, ytr, Xva, Yva, yva, no_runs, GDparameters, l_min, l_max, b_init, W_init,no_layers, betas_init, gammas_init, alpha, mu_av, var_av)
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%% Fine Grid Search %%%%%%%%%
-l_min = -15;
-l_max = -1;
-no_runs = 40;
-GridSearch(Xte, yte, Xtr, Ytr, ytr, Xva, Yva, yva, no_runs, GDparameters, l_min, l_max, b_init, W_init,no_layers, betas_init, gammas_init, alpha, mu, variance);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
-% [cost_training, cost_validation, loss_training, loss_validation, acc_training, acc_validation, Wstar, bstar, gammasstar, betastar, mu_av, var_av] = GradientDescentCyclicalLearning (Xtr, Ytr, ytr, Xva, Yva, yva, GDparameters, W_init, b_init, lambda, no_layers,betas_init, gammas_init, alpha, mu_av, var_av);
-% 
-% plotResults(cost_training, cost_validation, 100, no_points , GDparameters.n_batch, 'training cost', 'validation cost', 'Costs - 3 layer NN - cyclical learning & BN', 'update step', 'cost');
-% plotResults(loss_training, loss_validation, 100, no_points , GDparameters.n_batch, 'training loss', 'validation loss', 'Loss - 3 layer NN - sigma: 1e-4', 'update step', 'loss');
-% plotResults(acc_training, acc_validation, 100, no_points , GDparameters.n_batch, 'training accuracy', 'validation accuracy', 'Accuracy - 3 layer NN - cyclical learning & BN', 'update step', 'accuracy');
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEST ACCURACY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% acc_test = ComputeAccuracy(Xte, yte, Wstar, bstar, gammasstar, betastar, GDparameters.n_batch , mu_av, var_av);
-% 
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%% Finer Grid Search %%%%%%%%%
+% l_min = -2.612272498000000;%-2.562272498;%-2.692294055;
+% l_max = -2.499724355000000;%-2.549724355;%-2.492294055;
+% no_runs = 150;
+% GridSearch(Xte, yte, Xtr, Ytr, ytr, Xva, Yva, yva, no_runs, GDparameters, l_min, l_max, b_init, W_init,no_layers, betas_init, gammas_init, alpha, mu, variance);
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
 
 end
 
@@ -233,22 +236,17 @@ result_tables = cell(no_runs,1);
 % no runs controlls how many lambdas we want to train the network for
 for i = 1:no_runs
     
-    disp('###########################################################');
-    disp(i);
     % Drawing a lambda value
     l = l_min + ( l_max - l_min ) * rand(1,1);
     lambda = 10^l;
     results_grid_search(1,i) = lambda;
     
-    % Gradeitn Descent 
+    % Gradient Descent 
 
     [cost_training, cost_validation, loss_training, loss_validation, acc_training, acc_validation, Wstar, bstar, gammasstar, betastar, mu_av, var_av] = GradientDescentCyclicalLearning (Xtr, Ytr, ytr, Xva, Yva, yva, GDparameters, W_init, b_init, lambda, no_layers,betas_init, gammas_init, alpha, mu_av, var_av);
    
     
-    disp(lambda);
-    
     acc_test = ComputeAccuracy(Xte, yte, Wstar, bstar, gammasstar, betastar, GDparameters.n_batch , mu_av, var_av);
-    disp(acc_test);
 %     % Storing the lambda and its loss, cost and accuracy
 %     lambda_vec = zeros(size(cost_training,1),1);     
 %     lambda_vec(1) = lambda;
@@ -323,7 +321,7 @@ end
 
 end
 
-function [W, b] = initilizeWeightsAndBiases(no_layers, m, K, d)
+function [W, b] = initilizeWeightsAndBiases_sensitivity(no_layers, m, K, d)
 % b and W are initilized using a normal distribution 
 % Sensitivity Initilization.
 
@@ -358,11 +356,16 @@ b{end} = zeros(K, 1);
 end
 
 
-function [grad_J_W, grad_J_b, grad_J_be, grad_J_ga,  mu_av, var_av] = ComputeGradients(X, Y, W, b, lambda, no_layers, betas, gammas,  mu_av, var_av, varargin)
+function [grad_J_W, grad_J_b, grad_J_be, grad_J_ga,  mu_av, var_av] = ComputeGradients(X, Y, W, b, lambda, no_layers, betas, gammas,  mu_av, var_av, label_smoothing, varargin)
 % Backwardpass for a k layer network with batch normalization.
         
 [~, n] = size(X);
 vec_ones = ones(n,1);
+
+% %%%%%% (e) BONUS %%%%%%
+%X = applyJitter(X);
+% %%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 % Vectors to store results for weights and biases
@@ -392,7 +395,16 @@ end
 [P_batch, h_batch, mus, variances, s_norm, s,  mu_av, var_av ] = EvaluateClassifier(X, W, b, gammas, betas, true, a, mu_av, var_av, false);
 
 %Propagate The gradients through the loss and softmax operations
-G_batch = -(Y - P_batch); 
+
+
+% BONUS: one sided label smoothing.
+if label_smoothing
+    smoothed_labels = sampleSmoothedLabels(Y);
+    G_batch = -(smoothed_labels - P_batch); 
+
+else
+    G_batch = -(Y - P_batch); 
+end
 
 % For the k:th layer
 % The gradients of J w.r.t bias vector bk and Wk
@@ -492,8 +504,10 @@ for j=1:n/n_batch
     % Calculate the probabilities for the current minibatch.
     [P, ~, ~, ~, ~, ~,  ~, ~] = EvaluateClassifier(Xbatch, W, b, gammas, betas, true, alpha,  mu, var, precomputed );
     
+
     %Compute the loss and the cost for the minibatch.
     l_cross = -log(dot(Ybatch,P));
+    
     loss_batch = (sum(l_cross)/n);
     
     %Update the total loss.
@@ -504,6 +518,38 @@ end
 J = loss + regularization_term;
 end
 
+function [ X ] = applyJitter(X)
+% BONUS task e - applies a random jitter to each element in the training
+% data from a uniform distribution in the range of +/- x %
+[d, n] = size(X);
+
+jitter = -0.001 + (0.001 + 0.001)*rand(d,n);
+
+jitter = X.*jitter;
+
+X = X + jitter;
+end
+
+
+function smoothed_labels = sampleSmoothedLabels(Y)
+% BONUS: Performs one sided label smoothing within a certain range.
+% Kxn
+
+[K, n] = size(Y);
+
+% Uniformly sample a new label for each data point within a certain range.
+uppper_range = 1;
+lower_range = 0.95;
+
+% Generate values from the uniform distribution on the interval [lower_range, uppper_range]
+
+
+p = lower_range + (uppper_range-lower_range).*rand(1,n); % 1 x n
+p_matrix = repmat(p, [K,1]); % K x n
+
+smoothed_labels = Y .* p_matrix;
+
+end
 
 function G_batch = BatchNormBackPass( G_b, s_norm, mu, variance, vec_ones, n)
 % Normalize a batch of data such that they are unit gaussian along each
@@ -599,6 +645,8 @@ acc_training = zeros(GDparams.n_epochs+1, 1);
 acc_validation = zeros(GDparams.n_epochs+1, 1);
 
 
+Xtr_unaugmented = Xtr;
+
 % We run through the epochs
 for epoch = 1:GDparams.n_epochs
 
@@ -638,8 +686,20 @@ for epoch = 1:GDparams.n_epochs
         acc_validation(epoch+1) = ComputeAccuracy(Xva, yva, W, b, gammas, betas, GDparams.n_batch, mu_av, var_av);
     end
     
-    %Shuffling data points after every epoch
+    
+    % BONUS: Mirroring the datapoints
+%     if mod(epoch,2) == 0
+%         prob = 0.01;
+%         Xtr = mirrorBatch( Xtr, prob);
+% %     else
+% %         Xtr = Xtr_unaugmented;
+%          
+%     end
+
     [ Xtr, Ytr, ytr ] = shuffleDataPoints(Xtr, Ytr, ytr);
+    
+
+    
 end
 end
 
@@ -659,7 +719,8 @@ function [Wstar, bstar, gammasstar, betastar, GDparams, mu_av, var_av ] = MiniBa
         Ybatch = Y(:, inds);
         
         % Compute the gradients for the parameters to be learned.
-        [grad_W, grad_b, grad_betas, grad_gammas,  mu_av, var_av] = ComputeGradients(Xbatch, Ybatch, W, b, lambda, no_layers, betas, gammas,  mu_av, var_av, batch, epoch, alpha);
+        label_smoothing = false;
+        [grad_W, grad_b, grad_betas, grad_gammas,  mu_av, var_av] = ComputeGradients(Xbatch, Ybatch, W, b, lambda, no_layers, betas, gammas,  mu_av, var_av, label_smoothing, batch, epoch, alpha);
         
         % We increase the update step
         GDparams.update_step = GDparams.update_step + 1;
@@ -798,9 +859,64 @@ A = load(filename);
 X = double(A.data');
 %X = X / 255;
 
+
 y = A.labels;
 y = y + 1 ;
 Y = oneHotEncoder(y);
+
+end
+
+function X_batch = mirrorBatch( X_batch, prob)
+
+
+%X_batch = X_batch(1:7,1:8);
+
+[d , n] = size(X_batch);
+
+% Sampling indicies of images to be mirrored.
+%prob = 1 - prob;
+mask = ((rand(size(X_batch,2),1)) < prob)';
+
+ims_to_be_mirrored = X_batch .* repmat(mask,[d,1]); 
+indicies_mirrored_ims = find(ims_to_be_mirrored);
+
+
+% Reshaping the images to be mirrored into a matrix format.
+s_im = reshape(ims_to_be_mirrored, 32, 32, 3, n);
+
+% This row can be used during debugging to make sure that the mirroring is
+% correct.
+%s_im = (s_im - min(s_im(:))) / (max(s_im(:)) - min(s_im(:)));
+
+s_im = permute(s_im, [2, 1, 3, 4]);
+
+% Mirroring the images.
+s_im = flipdim(s_im, 2);
+
+% Going back to the vector format.
+im = reshape(s_im, 3072, n);
+
+
+% These rows can be used during debugging to make sure that the mirroring is
+% correct.
+% Reshaping all of the images in the batch into a matrix format.
+%s_im_all = reshape(X_batch, 32, 32, 3, n);
+%s_im_all = (s_im_all - min(s_im_all(:))) / (max(s_im_all(:)) - min(s_im_all(:)));
+%s_im_all = permute(s_im_all, [2, 1, 3, 4]);
+% Going back to the vector format.
+%s_im_all = reshape(s_im_all, 3072, n);
+
+
+% Putting the mirrored images into the matrix with the regular images.
+X_batch(indicies_mirrored_ims) = im(indicies_mirrored_ims);
+
+
+
+%Debugging. To make sure that the images were mirrored correctly.
+% s_im = reshape(s_im_all,32,32,3,8);
+% figure();
+% montage(s_im);
+% hold on;
 end
 
 
@@ -851,6 +967,58 @@ acc = total_no_accurate_classifications/n;
 
 end
 
+
+function [P, h, mu_vec, variance_vec, s_norm, s, mu_av, var_av ] = EvaluateClassifier_org(X, W, b, gammas, betas, normalize, alpha, mu_av, var_av, precomputed)
+%Evaluates a k layer network via a forwardpass
+
+[~, n] = size(X);
+k = size(W, 1);
+
+s = cell(k,1);
+s_norm = cell(k-1, 1);
+h = cell(k,1);
+
+mu_vec = cell(k-1,1);
+variance_vec = cell(k-1,1);
+
+
+h{1} = X; 
+
+
+for l = 1:k-1
+    
+    s{l} = W{l} * h{l} + repmat( b{l}, [1, n] );  % 50x1 
+    
+    % Batch Normlaization
+    % Compute the mean and variances for the current layer.
+    [ mu, variance ] = compute_mean_variance( s{l} );
+    mu_vec{l} = mu ;
+    variance_vec{l} = variance;
+    
+    % 1. The first minibatch of the first epoch alpha is set to 0 to get
+    % mu_avg = mu and var_avg = var
+    % 2. If we are using precomputed averages during testing alpha is set to 1. 
+    % Thus, the precomputed values are not updated.
+    mu_av{l} = alpha*mu_av{l} + (1-alpha)*mu_vec{l};
+    var_av{l} = alpha*var_av{l} + (1-alpha)*variance_vec{l};
+    
+    if precomputed
+        s_norm{l} = BatchNormalize( s{l} , mu_av{l}, var_av{l}, eps );
+    else
+        s_norm{l} = BatchNormalize( s{l} , mu, variance, eps );
+    end
+    
+    s_shifted_scaled = repmat( gammas{l}, [1, size(s_norm{l},2)] ) .* s_norm{l} + repmat( betas{l}, [1, size(s_norm{l},2)]);
+    
+    h{l+1} = max( 0, s_shifted_scaled ); 
+        
+end
+
+% For the kth layer
+s{k} = W{k}*h{k} + repmat( b{k}, [1, n] );
+
+P = softmax(s{k});
+end
 
 function [P, h, mu_vec, variance_vec, s_norm, s, mu_av, var_av ] = EvaluateClassifier(X, W, b, gammas, betas, normalize, alpha, mu_av, var_av, precomputed)
 %Evaluates a k layer network via a forwardpass
@@ -905,9 +1073,13 @@ P = softmax(s{k});
 end
 
 
-function [P, h, mu_vec, variance_vec, s_norm, s, mu_av, var_av ] = EvaluateClassifier_Inverted_DropOut(X, W, b, gammas, betas, normalize, alpha, mu_av, var_av, precomputed)
+function [P, h, mu_vec, variance_vec, s_norm, s, mu_av, var_av ] = EvaluateClassifier_DropOut(X, W, b, gammas, betas, normalize, alpha, mu_av, var_av, precomputed)
 %Evaluates a k layer network via a forwardpass
+% Uses both Batch Normalization and inverted droput and is used during the
+% training phase of the network.
 
+prob = 0.01;
+p = 1 - prob;
 [~, n] = size(X);
 k = size(W, 1);
 
@@ -950,10 +1122,10 @@ for l = 1:k-1
     h{l+1} = max( 0, s_shifted_scaled );
     
     % Inverted dropout
-    u = (rand(size(h{l+1})) < p)/p;
-    
-    
-    
+    inds = size(h{l+1});
+    u = (rand(inds) < p)/p;
+    h{l+1} = h{l+1}.* u;
+  
         
 end
 
