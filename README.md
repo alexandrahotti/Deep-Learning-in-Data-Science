@@ -25,4 +25,31 @@ In assignment 4 a RNN is trained to synthesize English text character
 by character. First  a vanilla RNN is trained using the text from the book 
 The Goblet of Fire by J.K. Rowling. AdaGrad is used for optimization.
 
-In the Bonus Part of the assignment text was synthesized using text from Donald Trumps twitter account.
+In the Bonus Part of the assignment text was synthesized using text from Donald Trump's twitter account.
+
+### Excerpt of results
+
+#### Synthesized text - Harry Potter and the Goblet of Fire
+
+ your voice ears, yesuse said, bus beteragring?" said **Bagman** you's soppome a?"
+There Cuntupily leoc kitch the Midingicidestly."
+"Sod numored to **Cedric** weires.  Nide feal **Hagrid**.
+"Nor  liftered old secled, ans root.  I yining abots mound. ... Tress fired one to chingested else a here tay gated to Debbasley, lunget and lot the **Durmst**ended. . . ." Paint ac Sert. . . straid she spomsthed the rofecodyy **Hermione** had for student from all onto mound Death; they wopping.
+"What up they interumped at rail it.  Yeh.  They're was hand **Harry** have toward telfing appide awrothould **Siri**age she had nothor ickiet, a fit to schoundoning ay.
+"Mapperly tust sixts.  He seieven she back in ontigind **Hogwarts**," said **Ron**."
+"Dad dundridesble onebly.
+	"stath that the deed in he fromt giving, was **Krum's** chom, the closed of that the not anything have, **Harry** all odd they shought excapped, so fliensint.
+  
+  #### Synthesized text - Donald Trump’s twitter account
+  atad and **borders** has uncetich wondess, **good** revemennerny!§Joxecoblougit Vator) of **Democrat**on in InIC **Korea** latiot **bad** TODRE!
+https://t.co/M3
+
+im you! **Love** stthis such Mem Your offict."SCATK!
+**#Trump2016**
+#Menjesl you 2016 
+**poor, and of through America take has riched**§A whogalyghed 
+
+clawing the kneais on doy trun't hanyive I werroong hinn goime Strie. **#MakeAmericaGreat**
+
+ill bichin! 
+#O.NP on a STroucested, even touation who with unyorm. I **fear sv sartary **Hillary!** httpshaspucal **President U.S. @realDonald**Trciegh
