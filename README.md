@@ -1,5 +1,5 @@
 # Deep Learning in Data Science
-This repository contains assignment solutions for the course DD2424 Deep Learning in Data Science.
+This repository contains assignment solutions for the course called Deep Learning in Data Science.
 
 
 ## Assignment 1 - A one layer network
