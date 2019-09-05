@@ -31,6 +31,10 @@ In the Bonus Part of the assignment text was synthesized using text from Donald 
 
 #### Synthesized text - Harry Potter and the Goblet of Fire
 
+  <p float="left" align='center'>  
+  <img src='https://kbimages1-a.akamaihd.net/8142b472-825e-423d-abab-e63a08bef35b/353/569/90/False/harry-potter-and-the-goblet-of-fire-10.jpg' width="28%" height="28%"
+ />
+	
  your voice ears, yesuse said, bus beteragring?" said **Bagman** you's soppome a?"
 There Cuntupily leoc kitch the Midingicidestly."
 "Sod numored to **Cedric** weires.  Nide feal **Hagrid**.
@@ -41,6 +45,11 @@ There Cuntupily leoc kitch the Midingicidestly."
 	"stath that the deed in he fromt giving, was **Krum's** chom, the closed of that the not anything have, **Harry** all odd they shought excapped, so fliensint.
   
   #### Synthesized text - Donald Trump’s twitter account
+  <p float="left" align='center'>  
+  <img src='https://sc.cnbcfm.com/applications/cnbc.com/resources/files/2013/02/21/trump-hacked2-twitter.gif' width="28%" height="28%"
+ />
+  	
+  
   atad and **borders** has uncetich wondess, **good** revemennerny!§Joxecoblougit Vator) of **Democrat**on in InIC **Korea** latiot **bad** TODRE!
 https://t.co/M3
 
@@ -51,5 +60,5 @@ im you! **Love** stthis such Mem Your offict."SCATK!
 
 clawing the kneais on doy trun't hanyive I werroong hinn goime Strie. **#MakeAmericaGreat**
 
-ill bichin! 
-#O.NP on a STroucested, even touation who with unyorm. I **fear sv sartary **Hillary!** httpshaspucal **President U.S. @realDonald**Trciegh
+ill **bichin!** 
+#O.NP on a STroucested, even touation who with unyorm. I **fear** sv sartary **Hillary!** httpshaspucal **President U.S. @realDonald**Trciegh
